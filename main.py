@@ -1,10 +1,10 @@
-import sys
 from tkinter import filedialog
 import pygame
 from pygame.locals import *
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
+
 
 class Model3DViewer:
     def __init__(self, file_path):
@@ -28,7 +28,11 @@ class Model3DViewer:
         # Установка начальной матрицы проекции
         self.reshape(800, 600)
 
-    def read_fdf_file(self, file_path):
+        # Создание списка отображения
+        self.display_list = self.create_display_list()
+
+    @staticmethod
+    def read_fdf_file(file_path):
         heights = []
         colors = []
         with open(file_path, 'r') as f:
@@ -48,19 +52,9 @@ class Model3DViewer:
                 colors.append(row_colors)
         return np.array(heights), np.array(colors)
 
-    def display(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glLoadIdentity()
-
-        # Перемещение камеры назад для обзора модели
-        glTranslatef(0.0, 0.0, -50.0)
-
-        # Повороты модели
-        glRotatef(self.angle_x, 1.0, 0.0, 0.0)
-        glRotatef(self.angle_y, 0.0, 1.0, 0.0)
-
-        # Масштабирование модели
-        glScalef(self.scale, self.scale, self.scale)
+    def create_display_list(self):
+        display_list = glGenLists(1)
+        glNewList(display_list, GL_COMPILE)
 
         rows, cols = self.heights.shape
         for i in range(rows - 1):
@@ -80,9 +74,30 @@ class Model3DViewer:
                 glVertex3f(i - rows / 2, j + 1 - cols / 2, self.heights[i][j + 1])
                 glEnd()
 
+        glEndList()
+        return display_list
+
+    def display(self):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glLoadIdentity()
+
+        # Перемещение камеры назад для обзора модели
+        glTranslatef(0.0, 0.0, -50.0)
+
+        # Повороты модели
+        glRotatef(self.angle_x, 1.0, 0.0, 0.0)
+        glRotatef(self.angle_y, 0.0, 1.0, 0.0)
+
+        # Масштабирование модели
+        glScalef(self.scale, self.scale, self.scale)
+
+        # Используем предварительно созданный список отображения
+        glCallList(self.display_list)
+
         pygame.display.flip()
 
-    def reshape(self, width, height):
+    @staticmethod
+    def reshape(width, height):
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
@@ -111,6 +126,7 @@ class Model3DViewer:
             self.display()
         pygame.quit()
 
+
 def main():
     file_path = filedialog.askopenfilename(
         title="Выберите FDF файл",
@@ -121,6 +137,7 @@ def main():
 
     viewer = Model3DViewer(file_path)
     viewer.run()
+
 
 if __name__ == "__main__":
     main()
