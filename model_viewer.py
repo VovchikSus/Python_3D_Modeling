@@ -3,6 +3,7 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from utils import read_fdf_file
+import numpy as np
 
 
 class Model3DViewer:
@@ -32,22 +33,56 @@ class Model3DViewer:
         glNewList(display_list, GL_COMPILE)
 
         rows, cols = self.heights.shape
+        min_height = np.min(self.heights)
+        max_height = np.max(self.heights)
+
         for i in range(rows - 1):
             for j in range(cols - 1):
                 # Вычисляем координаты
                 x1, y1 = i - rows / 2, j - cols / 2
                 x2, y2 = i + 1 - rows / 2, j + 1 - cols / 2
 
-                # Вершины и цвета квадрата
+                # Вершины и их высоты
                 height_ij = self.heights[i][j]
                 height_ip1j = self.heights[i + 1][j]
                 height_ip1jp1 = self.heights[i + 1][j + 1]
                 height_ijp1 = self.heights[i][j + 1]
 
-                color_ij = self.colors[i][j]
-                color_ip1j = self.colors[i + 1][j]
-                color_ip1jp1 = self.colors[i + 1][j + 1]
-                color_ijp1 = self.colors[i][j + 1]
+                # Нормализуем высоты
+                normalized_height_ij = (
+                        (height_ij - min_height) / (max_height - min_height)
+                )
+                normalized_height_ip1j = (
+                        (height_ip1j - min_height) / (max_height - min_height)
+                )
+                normalized_height_ip1jp1 = (
+                        (height_ip1jp1 - min_height) / (max_height - min_height)
+                )
+                normalized_height_ijp1 = (
+                        (height_ijp1 - min_height) / (max_height - min_height)
+                )
+
+                # Изменение яркости цвета в зависимости от высоты
+                def adjust_brightness(color, factor):
+                    return tuple(
+                        min(1.0, c * factor) for c in color
+                    )
+
+                # Получаем цвета и изменяем их яркость
+                color_ij = adjust_brightness(
+                    self.colors[i][j], 0.5 + 0.5 * normalized_height_ij
+                )
+                color_ip1j = adjust_brightness(
+                    self.colors[i + 1][j], 0.5 + 0.5 * normalized_height_ip1j
+                )
+                color_ip1jp1 = adjust_brightness(
+                    self.colors[i + 1][j + 1],
+                    0.5 + 0.5 * normalized_height_ip1jp1
+                )
+                color_ijp1 = adjust_brightness(
+                    self.colors[i][j + 1],
+                    0.5 + 0.5 * normalized_height_ijp1
+                )
 
                 # Рисуем квадрат
                 glBegin(GL_QUADS)
