@@ -34,15 +34,34 @@ class Model3DViewer:
         rows, cols = self.heights.shape
         for i in range(rows - 1):
             for j in range(cols - 1):
+                # Вычисляем координаты
+                x1, y1 = i - rows / 2, j - cols / 2
+                x2, y2 = i + 1 - rows / 2, j + 1 - cols / 2
+
+                # Вершины и цвета квадрата
+                height_ij = self.heights[i][j]
+                height_ip1j = self.heights[i + 1][j]
+                height_ip1jp1 = self.heights[i + 1][j + 1]
+                height_ijp1 = self.heights[i][j + 1]
+
+                color_ij = self.colors[i][j]
+                color_ip1j = self.colors[i + 1][j]
+                color_ip1jp1 = self.colors[i + 1][j + 1]
+                color_ijp1 = self.colors[i][j + 1]
+
+                # Рисуем квадрат
                 glBegin(GL_QUADS)
-                glColor3fv(self.colors[i][j])
-                glVertex3f(i - rows / 2, j - cols / 2, self.heights[i][j])
-                glColor3fv(self.colors[i + 1][j])
-                glVertex3f(i + 1 - rows / 2, j - cols / 2, self.heights[i + 1][j])
-                glColor3fv(self.colors[i + 1][j + 1])
-                glVertex3f(i + 1 - rows / 2, j + 1 - cols / 2, self.heights[i + 1][j + 1])
-                glColor3fv(self.colors[i][j + 1])
-                glVertex3f(i - rows / 2, j + 1 - cols / 2, self.heights[i][j + 1])
+                glColor3fv(color_ij)
+                glVertex3f(x1, y1, height_ij)
+
+                glColor3fv(color_ip1j)
+                glVertex3f(x2, y1, height_ip1j)
+
+                glColor3fv(color_ip1jp1)
+                glVertex3f(x2, y2, height_ip1jp1)
+
+                glColor3fv(color_ijp1)
+                glVertex3f(x1, y2, height_ijp1)
                 glEnd()
 
         glEndList()

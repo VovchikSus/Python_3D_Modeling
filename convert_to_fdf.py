@@ -1,6 +1,4 @@
 def convert_image_to_fdf(file_path):
-    # Здесь должна быть функция конвертации изображения в FDF
-    # Например, используя библиотеку PIL для обработки изображения
     from PIL import Image
     try:
         img = Image.open(file_path)
@@ -11,8 +9,13 @@ def convert_image_to_fdf(file_path):
             for y in range(img.height):
                 line = []
                 for x in range(img.width):
-                    height = img.getpixel((x, y)) / 255.0 * 10  # Нормализация высоты
-                    color = 0xFFFFFF  # Белый цвет по умолчанию
+                    # Нормализация высоты
+                    height = img.getpixel((x, y)) / 255.0 * 10
+
+                    # Цвет: оттенок серого, соответствующий высоте
+                    intensity = height / 10.0  # Нормализация высоты в диапазон [0, 1]
+                    color = int(intensity * 255) * 0x010101  # Создаем оттенок серого
+
                     line.append(f"{height:.2f},{color:06x}")
                 f.write(" ".join(line) + "\n")
         return fdf_path

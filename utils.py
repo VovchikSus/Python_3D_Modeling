@@ -9,7 +9,6 @@ def read_fdf_file(file_path):
             row_heights = []
             row_colors = []
             for item in line.split():
-                # Проверяем, содержит ли элемент запятую (то есть высота с цветом или только высота)
                 if ',' in item:
                     height, color = item.split(',')
                     rgb_color = int(color, 16)
@@ -19,9 +18,9 @@ def read_fdf_file(file_path):
                         (rgb_color & 0xFF) / 255.0
                     )
                 else:
-                    # Если цвет не указан, используем оттенки серого на основе высоты
                     height = item
-                    intensity = float(height) / 255.0  # Нормализуем высоту (предполагая максимальную высоту 255)
+                    # Нормализуем высоту (предполагая максимальную высоту 255)
+                    intensity = float(height) / 255.0
                     color_rgb = (intensity, intensity, intensity)
 
                 row_heights.append(float(height))
@@ -31,4 +30,3 @@ def read_fdf_file(file_path):
             colors.append(row_colors)
 
     return np.array(heights), np.array(colors)
-

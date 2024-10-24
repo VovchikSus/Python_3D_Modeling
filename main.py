@@ -1,13 +1,18 @@
-from tkinter import filedialog
 import pygame
-from model_viewer import Model3DViewer
+from tkinter import filedialog
+
 import convert_to_fdf
+from model_viewer import Model3DViewer
 
 
 def main():
     file_path = filedialog.askopenfilename(
         title="Выберите FDF или изображение",
-        filetypes=(("FDF Files", "*.fdf"), ("Image Files", "*.png;*.jpg;*.jpeg"), ("All Files", "*.*"))
+        filetypes=(
+            ("FDF Files", "*.fdf"),
+            ("Image Files", "*.png;*.jpg;*.jpeg"),
+            ("All Files", "*.*")
+        )
     )
     if not file_path:
         return
